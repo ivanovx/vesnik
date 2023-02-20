@@ -24,6 +24,9 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +34,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
-    public static void main(String[] args) throws IOException, ParseException, TikaException, SAXException {
+    public static void main(String[] args) throws IOException, ParseException, TikaException, SAXException, URISyntaxException {
         Path vesnikRoot = Paths.get("C:\\Users\\csynt\\Desktop\\vesnik");
         List<Path> vesnikBroeve = Files.walk(vesnikRoot).filter(Files::isRegularFile).toList();
 
@@ -44,13 +47,13 @@ public class Main {
 
         for (Path vesnikBroi : vesnikBroeve) {
             String vesnikId = vesnikBroi.getFileName().toString();
-            String vesnikContent = parseToPlainText(vesnikBroi);
-            StringTokenizer tokens = new StringTokenizer(vesnikContent.toLowerCase());
-            String text = removeStopWords(tokens);
+            String vesnikContent = new Parser(vesnikBroi.toString()).toText();
+
+            String content = new Tokenizer(vesnikContent).getContent();
 
             Document document = new Document();
             document.add(new Field("id", vesnikId, TextField.TYPE_STORED));
-            document.add(new Field("content", text, TextField.TYPE_STORED));
+            document.add(new Field("content", content, TextField.TYPE_STORED));
 
             iwriter.addDocument(document);
         }
@@ -74,32 +77,5 @@ public class Main {
         ireader.close();
         directory.close();
         //IOUtils.rm(indexPath);
-    }
-
-    public static String parseToPlainText(Path filePath) throws IOException, SAXException, TikaException {
-        BodyContentHandler handler = new BodyContentHandler(-1);
-        AutoDetectParser parser = new AutoDetectParser();
-        Metadata metadata = new Metadata();
-
-        try (InputStream stream = new FileInputStream(filePath.toFile())) {
-            parser.parse(stream, handler, metadata);
-            return handler.toString();
-        }
-    }
-
-    public static String removeStopWords(StringTokenizer tokens) throws IOException {
-        StringBuffer stringBuffer = new StringBuffer();
-        List<String> stopWords = Files.readAllLines(Paths.get("C:\\Users\\csynt\\Downloads\\stop_words_bulgarian.txt"));
-
-        while (tokens.hasMoreTokens()) {
-            String word = tokens.nextToken();
-
-            if (!stopWords.contains(word)) {
-                stringBuffer.append(word);
-                stringBuffer.append(" ");
-            }
-        }
-
-        return stringBuffer.toString();
     }
 }
