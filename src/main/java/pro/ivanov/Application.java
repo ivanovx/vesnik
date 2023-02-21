@@ -29,6 +29,8 @@ public class Application {
             indexer.indexDoc(document);
         }
 
-        indexer.searchDoc("content", "Вежди");
+        List<Document> documents = indexer.searchDoc("content", "Вежди");
+
+        documents.forEach(document -> System.out.println(document.get("id")));
     }
 }

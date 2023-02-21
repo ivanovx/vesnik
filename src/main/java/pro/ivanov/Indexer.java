@@ -12,25 +12,21 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class Indexer {
-    public final static String NAME = "tempIndex";
+    private final Analyzer analyzer = new StandardAnalyzer();
 
-    public final Analyzer analyzer = new StandardAnalyzer();
+    private final Path indexPath = Paths.get("C:\\Temp");
 
-    private Path indexPath;
-
-    public Indexer() throws IOException {
-        String dir = String.valueOf(Paths.get(NAME));
-        this.indexPath = Files.createTempDirectory(dir);
-    }
 
     private Directory getIndexDirectory() throws IOException {
         return FSDirectory.open(indexPath);
@@ -39,32 +35,36 @@ public class Indexer {
     public void indexDoc(Document document) {
         IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
 
-        try (IndexWriter iwriter = new IndexWriter(this.getIndexDirectory(), config)) {
-            iwriter.addDocument(document);
+        try (IndexWriter indexWriter = new IndexWriter(this.getIndexDirectory(), config)) {
+            indexWriter.addDocument(document);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void searchDoc(String field, String value) {
-        try (DirectoryReader ireader = DirectoryReader.open(this.getIndexDirectory())) {
-            IndexSearcher isearcher = new IndexSearcher(ireader);
+    public List<Document> searchDoc(String field, String value) throws IOException, ParseException {
+        try (DirectoryReader indexReader = DirectoryReader.open(this.getIndexDirectory())) {
+            IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
             QueryParser parser = new QueryParser(field, analyzer);
             Query query = parser.parse(value);
 
-            ScoreDoc[] hits = isearcher.search(query, 15).scoreDocs;
+            ScoreDoc[] hits = indexSearcher.search(query, 10).scoreDocs;
 
-            StoredFields storedFields = isearcher.storedFields();
+            StoredFields storedFields = indexSearcher.storedFields();
 
-            for (int i = 0; i < hits.length; i++) {
-                Document hitDoc = storedFields.document(hits[i].doc);
-                System.out.println(hitDoc.get("id"));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+            List<Document> hitDocs = Arrays.stream(hits).map(hit -> {
+                try {
+                    Document hitDoc = storedFields.document(hit.doc);
+
+                    return hitDoc;
+                } catch (IOException e) {
+                    //throw new RuntimeException(e);
+                }
+                return null;
+            }).toList();
+
+            return hitDocs;
         }
     }
 }
