@@ -1,5 +1,6 @@
 package pro.ivanov;
 
+import lombok.SneakyThrows;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -24,12 +25,7 @@ import java.util.List;
 public class Indexer {
     private final Analyzer analyzer = new StandardAnalyzer();
 
-    private final Path indexPath = Paths.get("C:\\Temp");
-
-
-    private Directory getIndexDirectory() throws IOException {
-        return FSDirectory.open(indexPath);
-    }
+    private final static Path INDEX_PATH = Paths.get("C:\\Temp");
 
     public void indexDoc(Document document) throws IOException {
         IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
@@ -37,13 +33,15 @@ public class Indexer {
         try (IndexWriter indexWriter = new IndexWriter(this.getIndexDirectory(), config)) {
             indexWriter.addDocument(document);
         }
+
+        this.analyzer.close();
     }
 
     public List<Document> searchDoc(String field, String value) throws IOException, ParseException {
-        try (DirectoryReader indexReader = DirectoryReader.open(this.getIndexDirectory())) {
+        try (DirectoryReader indexReader = DirectoryReader.open(getIndexDirectory())) {
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
-            QueryParser parser = new QueryParser(field, analyzer);
+            QueryParser parser = new QueryParser(field, this.analyzer);
             Query query = parser.parse(value);
 
             ScoreDoc[] hits = indexSearcher.search(query, 10).scoreDocs;
@@ -65,5 +63,10 @@ public class Indexer {
 
             return hitDocs;
         }
+    }
+
+    @SneakyThrows
+    private static Directory getIndexDirectory() {
+        return FSDirectory.open(INDEX_PATH);
     }
 }

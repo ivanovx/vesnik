@@ -1,4 +1,4 @@
-package pro.ivanov.inputModel;
+package pro.ivanov.web.inputModel;
 
 import lombok.Getter;
 import lombok.Setter;
