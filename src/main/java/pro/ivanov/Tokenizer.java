@@ -1,5 +1,7 @@
 package pro.ivanov;
 
+import lombok.SneakyThrows;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,14 +17,15 @@ public class Tokenizer {
         this.text = text;
     }
 
-    public String getContent() throws URISyntaxException, IOException {
+    public String getContent() {
         final StringTokenizer tokens = new StringTokenizer(this.text.toLowerCase());
         final String content = this.removeStopWords(tokens);
 
         return content;
     }
 
-    private String removeStopWords(StringTokenizer tokens) throws URISyntaxException, IOException {
+    @SneakyThrows
+    private String removeStopWords(StringTokenizer tokens) {
         StringBuffer stringBuffer = new StringBuffer();
 
         URI path = this.getClass().getClassLoader().getResource("stop_words_bulgarian.txt").toURI();

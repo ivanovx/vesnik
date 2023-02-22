@@ -12,7 +12,6 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -32,13 +31,11 @@ public class Indexer {
         return FSDirectory.open(indexPath);
     }
 
-    public void indexDoc(Document document) {
+    public void indexDoc(Document document) throws IOException {
         IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
 
         try (IndexWriter indexWriter = new IndexWriter(this.getIndexDirectory(), config)) {
             indexWriter.addDocument(document);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -54,14 +51,16 @@ public class Indexer {
             StoredFields storedFields = indexSearcher.storedFields();
 
             List<Document> hitDocs = Arrays.stream(hits).map(hit -> {
-                try {
-                    Document hitDoc = storedFields.document(hit.doc);
+                Document hitDoc = null;
 
-                    return hitDoc;
+                try {
+                    hitDoc = storedFields.document(hit.doc);
                 } catch (IOException e) {
-                    //throw new RuntimeException(e);
+                    throw new RuntimeException(e);
                 }
-                return null;
+
+                return hitDoc;
+
             }).toList();
 
             return hitDocs;

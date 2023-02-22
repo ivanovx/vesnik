@@ -1,10 +1,9 @@
 package pro.ivanov;
 
-import org.apache.tika.exception.TikaException;
+import lombok.SneakyThrows;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.xml.sax.SAXException;
 
 import java.io.*;
 
@@ -15,7 +14,8 @@ public class Parser {
         this.fileName = fileName;
     }
 
-    public String toText() throws IOException, TikaException, SAXException {
+    @SneakyThrows
+    public String toText(){
         BodyContentHandler handler = new BodyContentHandler(-1);
         AutoDetectParser parser = new AutoDetectParser();
         Metadata metadata = new Metadata();
