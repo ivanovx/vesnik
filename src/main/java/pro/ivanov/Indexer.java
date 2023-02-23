@@ -2,6 +2,7 @@ package pro.ivanov;
 
 import lombok.SneakyThrows;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.bg.BulgarianAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Indexer {
-    private final Analyzer analyzer = new StandardAnalyzer();
+    private final Analyzer analyzer = new BulgarianAnalyzer();
 
     private final static Path INDEX_PATH = Paths.get("C:\\Temp");
 
@@ -34,7 +35,7 @@ public class Indexer {
             indexWriter.addDocument(document);
         }
 
-        this.analyzer.close();
+        //this.analyzer.close();
     }
 
     public List<Document> searchDoc(String field, String value) throws IOException, ParseException {
@@ -58,8 +59,9 @@ public class Indexer {
                 }
 
                 return hitDoc;
-
             }).toList();
+
+            //this.analyzer.close();
 
             return hitDocs;
         }

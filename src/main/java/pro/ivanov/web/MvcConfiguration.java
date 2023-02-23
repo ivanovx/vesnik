@@ -1,4 +1,4 @@
-package pro.ivanov;
+package pro.ivanov.web;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -12,9 +12,11 @@ public class MvcConfiguration implements WebMvcConfigurer {
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+
         resolver.setPrefix("/WEB-INF/");
         resolver.setSuffix(".jsp");
         resolver.setViewClass(JstlView.class);
+
         registry.viewResolver(resolver);
     }
 }

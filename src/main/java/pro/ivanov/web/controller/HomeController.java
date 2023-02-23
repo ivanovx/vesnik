@@ -23,11 +23,13 @@ public class HomeController {
         return "index";
     }
 
-    @ResponseBody
     @RequestMapping(value = "/search", method = RequestMethod.POST)
-    public List<Document> search(@ModelAttribute Search search, Model model) throws IOException, ParseException {
+    public String search(@ModelAttribute Search search, Model model) throws IOException, ParseException {
         final Indexer indexer = new Indexer();
 
-        return indexer.searchDoc("content", search.getCriteria());
+        model.addAttribute("criteria", search.getCriteria());
+        model.addAttribute("results", indexer.searchDoc("content", search.getCriteria()));
+
+        return "result";
     }
 }
