@@ -1,5 +1,5 @@
 import math
-from nltk import sent_tokenize, PorterStemmer, word_tokenize
+from nltk import PorterStemmer, word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 
 def create_frequency_matrix(sentences):
@@ -115,12 +115,12 @@ def generate_summary(sentences, sentenceValue, threshold):
 
     return summary
 
+
 if __name__ == '__main__':
     text = open('text.txt', 'r').read()
 
     sentences = sent_tokenize(text)
     total_documents = len(sentences)
-
     freq_matrix = create_frequency_matrix(sentences)
     tf_matrix = create_tf_matrix(freq_matrix)
     count_doc_per_words = create_documents_per_words(freq_matrix)
